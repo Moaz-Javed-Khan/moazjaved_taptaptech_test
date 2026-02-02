@@ -1,16 +1,47 @@
-# moazjaved_taptaptech_test
+# Product Dashboard – Flutter Web
 
-A new Flutter project.
+A responsive Product Dashboard built with **Flutter Web + BLoC/Cubit + Clean Architecture**.  
+Demonstrates scalable structure, reactive state management, and modern dashboard UI.
 
-## Getting Started
+🌐 Live: https://moazjavedtaptaptechtestd.vercel.app/  
+📦 Repo: https://github.com/Moaz-Javed-Khan/moazjaved_taptaptech_test
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## Run Locally
+```bash
+git clone <repo>
+cd moazjaved_taptaptech_test
+flutter pub get
+flutter run -d chrome
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Structure
+```
+core/        shared configs & utils
+features/    product feature (data, domain, presentation, cubit)
+main.dart
+```
+Clean architecture for separation of concerns and scalability.
+
+---
+
+## Libraries
+flutter_bloc • go_router • dio • equatable • Material 3
+
+---
+
+## Features
+✔ Product list (table/grid)  
+✔ Search & filter  
+✔ Add/Edit modal with validation  
+✔ Details page  
+✔ Reactive Cubit state  
+✔ Responsive UI  
+✔ Deployed on Vercel
+
+---
+
+**Author:** Moaz Javed Khan
