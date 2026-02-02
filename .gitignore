@@ -30,7 +30,12 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/
+/build/.cxx
+/build/app
+/build/flutter_assets
+/build/native_assets
+/build/native_hooks
+/build/reports
 /coverage/
 
 # Symbolication related
