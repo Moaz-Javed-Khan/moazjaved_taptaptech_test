@@ -20,7 +20,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Moaz Javed Khan Test',
       themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.teal)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+      ),
     );
   }
 }

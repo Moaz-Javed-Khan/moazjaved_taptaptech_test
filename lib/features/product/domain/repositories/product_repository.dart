@@ -5,6 +5,8 @@ abstract class ProductRepository {
 
   Future<ProductEntity> getProductsCategory({required String category});
 
+  Future<ProductItemEntity> getProductById({required int id});
+
   Future<int> addProduct({
     required String title,
     required num price,

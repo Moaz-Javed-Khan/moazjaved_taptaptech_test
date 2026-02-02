@@ -6,117 +6,144 @@ import '../../../domain/entities/product_entity.dart';
 import '../../blocs/cubit/product_cubit.dart';
 import '../../widgets/custom_dialog.dart';
 
-import '../../../data/datasources/product_remote_data_source.dart';
-import '../../../data/repositories/product_repository_impl.dart';
-import '../../../domain/usecases/add_product_usecase.dart';
-import '../../../domain/usecases/edit_product_usecase.dart';
-import '../../../domain/usecases/get_product_by_category_usecase.dart';
-import '../../../domain/usecases/get_products_usecase.dart';
-
 class ProductDetailView extends StatelessWidget {
   const ProductDetailView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final ProductItemEntity? productItemEntity =
-        GoRouterState.of(context).extra as ProductItemEntity?;
-
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            Text(
-              productItemEntity?.title ?? "Laptop",
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              margin: EdgeInsets.zero,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Image.network(
-                        productItemEntity?.images[0] ?? "",
-                        height: 300,
-                        fit: BoxFit.fitHeight,
-                        // loadingBuilder: (context, child, loadingProgress) =>
-                        //     CircularProgressIndicator(),
-                        // errorBuilder: (context, error, stackTrace) =>
-                        //     Icon(Icons.error),
+    return BlocBuilder<ProductCubit, ProductState>(
+      builder: (context, state) {
+        if (state.getProductStatus == GetProductsStatus.loading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state.getProductStatus == GetProductsStatus.failure) {
+          return const Center(child: Text("Something went wrong!"));
+        } else if (state.getProductStatus == GetProductsStatus.loaded) {
+          return Scaffold(
+            body: LayoutBuilder(
+              builder: (context, constraints) {
+                final isNarrow = constraints.maxWidth < 600;
+                return OrientationBuilder(
+                  builder: (context, orientation) {
+                    final useVerticalLayout =
+                        isNarrow || orientation == Orientation.portrait;
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isNarrow ? 12 : 16,
+                        vertical: 8,
                       ),
-                    ),
-                    Expanded(
-                      flex: 3,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("ID: ${productItemEntity?.id ?? "101"}"),
+                          const SizedBox(height: 8),
                           Text(
-                            "Category: ${productItemEntity?.category ?? "Electronics"}",
+                            state.productItemEntity?.title ?? "Laptop",
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
-                          Text("Price: \$${productItemEntity?.price ?? 199}"),
-                          Text(
-                            "Description: ${productItemEntity?.description ?? "Description"}",
+                          const SizedBox(height: 8),
+                          Card(
+                            margin: EdgeInsets.zero,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: useVerticalLayout
+                                  ? _verticalContent(
+                                      context,
+                                      state.productItemEntity,
+                                    )
+                                  : _horizontalContent(
+                                      context,
+                                      state.productItemEntity,
+                                    ),
+                            ),
                           ),
-                          Text(
-                            (productItemEntity?.stock ?? 0) > 0
-                                ? "In Stock"
-                                : "Out of Stock",
-                          ),
-                          const Divider(),
-                          editProduct(context, productItemEntity),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    );
+                  },
+                );
+              },
             ),
-          ],
-        ),
-      ),
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
     );
   }
 
-  Widget editProduct(
+  Widget _verticalContent(
     BuildContext context,
     ProductItemEntity? productItemEntity,
   ) {
-    return BlocProvider(
-      create: (context) => ProductCubit(
-        getProductsUseCase: GetProductsUseCase(
-          ProductRepositoryImpl(
-            remoteDataSource: ProductRemoteDataSourceImpl(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Image.network(
+            productItemEntity?.images.isNotEmpty == true
+                ? productItemEntity!.images[0]
+                : "",
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) =>
+                const Icon(Icons.image_not_supported, size: 64),
           ),
         ),
+        const SizedBox(height: 16),
+        _productInfo(context, productItemEntity),
+      ],
+    );
+  }
 
-        getProductByCategoryUsecase: GetProductByCategoryUsecase(
-          ProductRepositoryImpl(
-            remoteDataSource: ProductRemoteDataSourceImpl(),
+  Widget _horizontalContent(
+    BuildContext context,
+    ProductItemEntity? productItemEntity,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 1,
+          child: Image.network(
+            productItemEntity?.images.isNotEmpty == true
+                ? productItemEntity!.images[0]
+                : "",
+            height: 300,
+            fit: BoxFit.fitHeight,
+            errorBuilder: (_, __, ___) =>
+                const Icon(Icons.image_not_supported, size: 64),
           ),
         ),
+        const SizedBox(width: 16),
+        Expanded(flex: 3, child: _productInfo(context, productItemEntity)),
+      ],
+    );
+  }
 
-        addProductUseCase: AddProductUseCase(
-          ProductRepositoryImpl(
-            remoteDataSource: ProductRemoteDataSourceImpl(),
-          ),
-        ),
+  Widget _productInfo(
+    BuildContext context,
+    ProductItemEntity? productItemEntity,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("ID: ${productItemEntity?.id ?? "101"}"),
+        Text("Category: ${productItemEntity?.category ?? "Electronics"}"),
+        Text("Price: \$${productItemEntity?.price ?? 199}"),
+        Text("Description: ${productItemEntity?.description ?? "Description"}"),
+        Text((productItemEntity?.stock ?? 0) > 0 ? "In Stock" : "Out of Stock"),
+        const Divider(),
+        _editProduct(context, productItemEntity),
+      ],
+    );
+  }
 
-        editProductUseCase: EditProductUseCase(
-          ProductRepositoryImpl(
-            remoteDataSource: ProductRemoteDataSourceImpl(),
-          ),
-        ),
-      ),
+  Widget _editProduct(
+    BuildContext context,
+    ProductItemEntity? productItemEntity,
+  ) {
+    return BlocProvider.value(
+      value: context.read<ProductCubit>(),
       child: BlocConsumer<ProductCubit, ProductState>(
         listenWhen: (previous, current) =>
             previous.addProductStatus != current.addProductStatus,
@@ -127,7 +154,7 @@ class ProductDetailView extends StatelessWidget {
 
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text("Product not added"),
+                content: Text("Product edit failed"),
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -137,7 +164,7 @@ class ProductDetailView extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  "Product added successfully 🎉, ID: ${state.newProductid}",
+                  "Product edited successfully 🎉, ID: ${state.newProductid}",
                 ),
                 behavior: SnackBarBehavior.floating,
               ),
@@ -158,7 +185,7 @@ class ProductDetailView extends StatelessWidget {
                 builder: (context) {
                   return CustomDialog(
                     title: "Edit Product",
-                    icon: Icon(Icons.add_box_rounded, size: 35),
+                    icon: const Icon(Icons.add_box_rounded, size: 35),
                     singleButton: false,
                     subTitle: "Fill information to add the product",
                     actions: [
@@ -196,7 +223,9 @@ class ProductDetailView extends StatelessWidget {
                                 color: Colors.grey,
                               ),
                               state.addProductStatus == AddProductStatus.loading
-                                  ? Center(child: CircularProgressIndicator())
+                                  ? const Center(
+                                      child: CircularProgressIndicator(),
+                                    )
                                   : Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
@@ -209,7 +238,7 @@ class ProductDetailView extends StatelessWidget {
                                               style: TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w600,
-                                                color: Colors.red,
+                                                color: Colors.red.shade700,
                                               ),
                                             ),
                                           ),
@@ -239,7 +268,7 @@ class ProductDetailView extends StatelessWidget {
                                               style: TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w600,
-                                                color: Colors.green,
+                                                color: Colors.green.shade700,
                                               ),
                                             ),
                                           ),
@@ -260,7 +289,7 @@ class ProductDetailView extends StatelessWidget {
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
             ),
-            child: Text("Edit Product"),
+            child: const Text("Edit Product"),
           );
         },
       ),

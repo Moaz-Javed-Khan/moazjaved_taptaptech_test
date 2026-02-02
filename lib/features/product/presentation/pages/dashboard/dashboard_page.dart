@@ -9,10 +9,10 @@ import '../../../domain/usecases/get_product_by_category_usecase.dart';
 import '../../../domain/usecases/get_product_by_id_usecase.dart';
 import '../../../domain/usecases/get_products_usecase.dart';
 import '../../blocs/cubit/product_cubit.dart';
-import 'products_view.dart';
+import 'dashboard_view.dart';
 
-class ProductsPage extends StatelessWidget {
-  const ProductsPage({super.key});
+class DashboardPage extends StatelessWidget {
+  const DashboardPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,32 +23,28 @@ class ProductsPage extends StatelessWidget {
             remoteDataSource: ProductRemoteDataSourceImpl(),
           ),
         ),
-
         getProductByCategoryUsecase: GetProductByCategoryUsecase(
           ProductRepositoryImpl(
             remoteDataSource: ProductRemoteDataSourceImpl(),
           ),
         ),
-
         getProductByIdUseCase: GetProductByIdUseCase(
           ProductRepositoryImpl(
             remoteDataSource: ProductRemoteDataSourceImpl(),
           ),
         ),
-
         addProductUseCase: AddProductUseCase(
           ProductRepositoryImpl(
             remoteDataSource: ProductRemoteDataSourceImpl(),
           ),
         ),
-
         editProductUseCase: EditProductUseCase(
           ProductRepositoryImpl(
             remoteDataSource: ProductRemoteDataSourceImpl(),
           ),
         ),
       )..getProducts(),
-      child: ProductsView(),
+      child: const DashboardView(),
     );
   }
 }

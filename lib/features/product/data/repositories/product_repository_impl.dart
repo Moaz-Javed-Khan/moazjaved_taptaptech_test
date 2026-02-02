@@ -13,6 +13,16 @@ class ProductRepositoryImpl implements ProductRepository {
   }
 
   @override
+  Future<ProductEntity> getProductsCategory({required String category}) {
+    return remoteDataSource.getProductsCategory(category: category);
+  }
+
+  @override
+  Future<ProductItemEntity> getProductById({required int id}) {
+    return remoteDataSource.getProductById(id: id);
+  }
+
+  @override
   Future<int> addProduct({
     required String title,
     required num price,
@@ -23,11 +33,6 @@ class ProductRepositoryImpl implements ProductRepository {
       price: price,
       quantity: quantity,
     );
-  }
-
-  @override
-  Future<ProductEntity> getProductsCategory({required String category}) {
-    return remoteDataSource.getProductsCategory(category: category);
   }
 
   @override

@@ -5,6 +5,7 @@ import '../../../domain/entities/product_entity.dart';
 import '../../../domain/usecases/add_product_usecase.dart';
 import '../../../domain/usecases/edit_product_usecase.dart';
 import '../../../domain/usecases/get_product_by_category_usecase.dart';
+import '../../../domain/usecases/get_product_by_id_usecase.dart';
 import '../../../domain/usecases/get_products_usecase.dart';
 
 part 'product_state.dart';
@@ -12,12 +13,14 @@ part 'product_state.dart';
 class ProductCubit extends Cubit<ProductState> {
   final GetProductsUseCase getProductsUseCase;
   final GetProductByCategoryUsecase getProductByCategoryUsecase;
+  final GetProductByIdUseCase getProductByIdUseCase;
   final AddProductUseCase addProductUseCase;
   final EditProductUseCase editProductUseCase;
 
   ProductCubit({
     required this.getProductsUseCase,
     required this.getProductByCategoryUsecase,
+    required this.getProductByIdUseCase,
     required this.addProductUseCase,
     required this.editProductUseCase,
   }) : super(ProductState());
@@ -51,6 +54,23 @@ class ProductCubit extends Cubit<ProductState> {
         state.copyWith(
           getProductStatus: GetProductsStatus.loaded,
           productModel: products,
+        ),
+      );
+    } catch (e) {
+      emit(state.copyWith(getProductStatus: GetProductsStatus.failure));
+    }
+  }
+
+  Future<void> getProductById({required int id}) async {
+    try {
+      emit(state.copyWith(getProductStatus: GetProductsStatus.loading));
+
+      final product = await getProductByIdUseCase(id: id);
+
+      emit(
+        state.copyWith(
+          getProductStatus: GetProductsStatus.loaded,
+          productItemEntity: product,
         ),
       );
     } catch (e) {

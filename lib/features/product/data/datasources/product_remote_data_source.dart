@@ -9,6 +9,8 @@ abstract class ProductRemoteDataSource {
 
   Future<ProductEntity> getProductsCategory({required String category});
 
+  Future<ProductItemEntity> getProductById({required int id});
+
   Future<int> addProduct({
     required String title,
     required num price,
@@ -39,6 +41,13 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
     final model = ProductModel.fromJson(res);
 
     return model.toEntity();
+  }
+
+  @override
+  Future<ProductItemEntity> getProductById({required int id}) async {
+    final res = await _apiService.getApi(endPoints: "products/$id");
+
+    return Product.fromJson(res).toEntity();
   }
 
   @override

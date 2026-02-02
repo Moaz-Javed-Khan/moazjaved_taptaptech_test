@@ -12,62 +12,109 @@ class ProductsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: [
-          SizedBox(height: 8),
-          Row(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 600;
+          return ListView(
+            padding: EdgeInsets.symmetric(
+              horizontal: isNarrow ? 12 : 16,
+              vertical: 8,
+            ),
             children: [
-              Text(
-                "Products",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              SizedBox(
-                width: 260,
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Search by category',
-                    hintText: 'Enter product category',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  onChanged: (val) {
-                    context.read<ProductCubit>().onSearchChange(val);
-                  },
-                ),
-              ),
-              const SizedBox(width: 10),
-
-              TextButton(
-                onPressed: () {
-                  context.read<ProductCubit>().getProductsByCategory();
-                },
-                child: Text("Search"),
-              ),
-
-              const SizedBox(width: 20),
-
-              TextButton(
-                onPressed: () {
-                  context.read<ProductCubit>().getProducts();
-                },
-                child: Text("Clear Search"),
-              ),
-
-              const SizedBox(width: 10),
-
-              addProduct(context),
+              isNarrow
+                  ? _buildMobileHeader(context)
+                  : _buildDesktopHeader(context),
+              const SizedBox(height: 8),
+              productCard(context, isNarrow),
             ],
-          ),
-          SizedBox(height: 8),
-          productCard(context),
-        ],
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildMobileHeader(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          "Products",
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+            decoration: const InputDecoration(
+              labelText: 'Search by category',
+              hintText: 'Enter product category',
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (val) =>
+                context.read<ProductCubit>().onSearchChange(val),
+          ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            TextButton(
+              onPressed: () =>
+                  context.read<ProductCubit>().getProductsByCategory(),
+              child: const Text("Search"),
+            ),
+            TextButton(
+              onPressed: () => context.read<ProductCubit>().getProducts(),
+              child: const Text("Clear Search"),
+            ),
+            addProduct(context),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopHeader(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          "Products",
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const Spacer(),
+        Flexible(
+          flex: 2,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 260),
+            child: TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Search by category',
+                hintText: 'Enter product category',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              onChanged: (val) =>
+                  context.read<ProductCubit>().onSearchChange(val),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        TextButton(
+          onPressed: () =>
+              context.read<ProductCubit>().getProductsByCategory(),
+          child: const Text("Search"),
+        ),
+        const SizedBox(width: 10),
+        TextButton(
+          onPressed: () => context.read<ProductCubit>().getProducts(),
+          child: const Text("Clear Search"),
+        ),
+        const SizedBox(width: 10),
+        addProduct(context),
+      ],
     );
   }
 
@@ -269,20 +316,27 @@ class ProductsView extends StatelessWidget {
     );
   }
 
-  Widget productCard(BuildContext context) {
+  Widget productCard(BuildContext context, bool isNarrow) {
     return Card(
       color: Colors.white,
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: isNarrow ? 12 : 16,
+          vertical: 12,
+        ),
         child: Column(
-          children: [cardHeader(context), const Divider(), productList()],
+          children: [
+            cardHeader(context, isNarrow),
+            const Divider(),
+            productList(isNarrow),
+          ],
         ),
       ),
     );
   }
 
-  Widget productList() {
+  Widget productList(bool isNarrow) {
     return BlocBuilder<ProductCubit, ProductState>(
       buildWhen: (previous, current) =>
           previous.getProductStatus != current.getProductStatus,
@@ -304,9 +358,10 @@ class ProductsView extends StatelessWidget {
             itemBuilder: (context, index) =>
                 (state.productModel?.products ?? []).isEmpty ||
                     state.productModel?.products == null
-                ? Text("No Product Found!!")
+                ? const Text("No Product Found!!")
                 : ProductItemWidget(
                     productItemEntity: state.productModel?.products[index],
+                    isCompact: isNarrow,
                   ),
           );
         } else {
@@ -316,7 +371,10 @@ class ProductsView extends StatelessWidget {
     );
   }
 
-  Widget cardHeader(BuildContext context) {
+  Widget cardHeader(BuildContext context, bool isNarrow) {
+    if (isNarrow) {
+      return const SizedBox.shrink();
+    }
     return Row(
       children: [
         Expanded(
@@ -324,9 +382,10 @@ class ProductsView extends StatelessWidget {
           child: Text(
             "ID",
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         Expanded(
@@ -334,9 +393,10 @@ class ProductsView extends StatelessWidget {
           child: Text(
             "Name",
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         Expanded(
@@ -344,9 +404,10 @@ class ProductsView extends StatelessWidget {
           child: Text(
             "Category",
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         Expanded(
@@ -354,9 +415,10 @@ class ProductsView extends StatelessWidget {
           child: Text(
             "Price",
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         Expanded(
@@ -364,9 +426,10 @@ class ProductsView extends StatelessWidget {
           child: Text(
             "Stock Status",
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
       ],

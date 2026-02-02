@@ -11,6 +11,8 @@ class ProductState extends Equatable {
 
   final String searchedCategory;
 
+  final ProductItemEntity? productItemEntity;
+
   final String title;
   final num price;
   final num quantity;
@@ -20,6 +22,7 @@ class ProductState extends Equatable {
     this.getProductStatus = GetProductsStatus.initial,
     this.addProductStatus = AddProductStatus.initial,
     this.productModel,
+    this.productItemEntity,
     this.searchedCategory = "",
     this.title = "",
     this.price = 0,
@@ -32,6 +35,8 @@ class ProductState extends Equatable {
     AddProductStatus? addProductStatus,
     ProductEntity? productModel,
 
+    ProductItemEntity? productItemEntity,
+
     String? searchedCategory,
 
     String? title,
@@ -43,6 +48,7 @@ class ProductState extends Equatable {
       getProductStatus: getProductStatus ?? this.getProductStatus,
       addProductStatus: addProductStatus ?? this.addProductStatus,
       productModel: productModel ?? this.productModel,
+      productItemEntity: productItemEntity ?? this.productItemEntity,
       searchedCategory: searchedCategory ?? this.searchedCategory,
       title: title ?? this.title,
       price: price ?? this.price,
@@ -56,6 +62,8 @@ class ProductState extends Equatable {
     getProductStatus,
     addProductStatus,
     productModel,
+
+    productItemEntity,
 
     searchedCategory,
 
